@@ -1,31 +1,21 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"fyne.io/fyne/app"
 
-	platforms "github.com/skwiwel/ifs-fractal-maker/internal/platforms"
-	renderers "github.com/skwiwel/ifs-fractal-maker/internal/renderers"
-
-	"github.com/inkyblackness/imgui-go/v2"
+	"github.com/skwiwel/ifs-fractal-maker/internal/fractal"
 )
 
 func main() {
-	context := imgui.CreateContext(nil)
-	defer context.Destroy()
-	io := imgui.CurrentIO()
+	app := app.New()
 
-	platform, err := platforms.NewGLFW(io, platforms.GLFWClientAPIOpenGL3)
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(-1)
-	}
-	defer platform.Dispose()
+	window := app.NewWindow("Fractal Maker")
+	window.SetPadded(false)
 
-	renderer, err := renderers.NewOpenGL3(io)
-	if err != nil {
-		_, _ = fmt.Fprintf(os.Stderr, "%v\n", err)
-		os.Exit(-1)
-	}
-	defer renderer.Dispose()
+	fractal.Setup(window)
+	//gui.Run(window, fractal.getController())
+
+	window.Show()
+
+	app.Run()
 }
