@@ -8,17 +8,17 @@ import (
 	"fyne.io/fyne/canvas"
 )
 
-const defaultWidth int32 = 200
-const defaultHeight int32 = 400
+const defaultWidth uint32 = 200
+const defaultHeight uint32 = 400
 
-const minWidth int32 = 100
-const minHeight int32 = 100
+const minWidth uint32 = 100
+const minHeight uint32 = 100
 
 type fractal struct {
-	width, height int32
+	width, height uint32
 	pixelArray    [][]color.RGBA
 
-	drawIterations int32
+	drawIterations uint32
 
 	window fyne.Window
 	canvas fyne.CanvasObject
@@ -43,7 +43,7 @@ func (f *fractal) MinSize(objects []fyne.CanvasObject) fyne.Size {
 	return fyne.NewSize(int(minWidth), int(minHeight))
 }
 
-func newFractal(width, height int32, window fyne.Window) *fractal {
+func newFractal(width, height uint32, window fyne.Window) *fractal {
 	pixelArray := make([][]color.RGBA, width)
 	for column := range pixelArray {
 		pixelArray[column] = make([]color.RGBA, height)
