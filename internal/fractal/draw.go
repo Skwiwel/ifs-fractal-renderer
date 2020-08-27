@@ -19,4 +19,4 @@ func (f *fractal) draw() {
 	)
 }
 
-func drawPixelArray(pBitmap [][]color.RGBA, width, height, loopCount uint32, p1, p2, p3, p4 float32, ifsTable [4][6]float32)
+func drawPixelArray(pixelArray [][]color.RGBA, width, height, loopCount uint32, p1, p2, p3, p4 float32, ifsTable [4][6]float32)

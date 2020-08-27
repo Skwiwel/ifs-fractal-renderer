@@ -31,6 +31,15 @@ func (f *fractal) getPixelAt(x, y, w, h int) color.Color {
 	return color.RGBA{}
 }
 
+func (f *fractal) fractalKey(ev *fyne.KeyEvent) {
+	f.draw()
+	f.refresh()
+}
+
+func (f *fractal) refresh() {
+	f.window.Canvas().Refresh(f.canvas)
+}
+
 func insideDimensions(x, y int, f *fractal) bool {
 	return x < int(f.width) && y < int(f.height)
 }
@@ -57,9 +66,20 @@ func newFractal(width, height uint32, window fyne.Window) *fractal {
 	}
 }
 
+// for testing purposes
+func (f *fractal) paintRed() {
+	for column := range f.pixelArray {
+		for row := range f.pixelArray[column] {
+			f.pixelArray[column][row] = color.RGBA{255, 0, 0, 255}
+		}
+	}
+}
+
 func Setup(window fyne.Window) {
 	fractal := newFractal(defaultWidth, defaultHeight, window)
+	fractal.paintRed()
 	fractal.canvas = canvas.NewRasterWithPixels(fractal.getPixelAt)
 
 	window.SetContent(fyne.NewContainerWithLayout(fractal, fractal.canvas))
+	window.Canvas().SetOnTypedKey(fractal.fractalKey)
 }
