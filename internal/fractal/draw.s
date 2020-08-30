@@ -98,73 +98,77 @@ bitmapClearPixel:
 	CMPQ	R10, R8
 	JLT		bitmapClearColumn
 	
+// Prepare propability values
+	MOVSS	p1+36(FP), X0
+	MOVSS	p2+40(FP), X1
+	MOVSS 	p3+44(FP), X2
+	MOVSS	p4+48(FP), X3
+	// sum up the propability values
+	ADDSS	X0, X1
+	ADDSS	X1, X2
+	ADDSS	X2, X3
+	// pack the values into a single register
+	UNPCKLPS	X1, X0
+	UNPCKLPS	X2, X3
+	MOVLHPS		X1, X0	// X0 := [p4, p3, p2, p1]
+
+// Prepare function value registers
+	MOVSS	ifsTable+(52+3*4)(FP), X1
+	MOVSS	ifsTable+(52+2*4)(FP), X15
+	UNPCKLPS	X15, X1
+	MOVSS	ifsTable+(52+1*4)(FP), X15
+	MOVSS	ifsTable+(52+0*4)(FP), X14
+	UNPCKLPS	X14, X15
+	MOVLHPS		X15, X1	// X1 := [a1, b1, c1, d1]
+
+	MOVSS	ifsTable+(52+9*4)(FP), X2
+	MOVSS	ifsTable+(52+8*4)(FP), X15
+	UNPCKLPS	X15, X2
+	MOVSS	ifsTable+(52+7*4)(FP), X15
+	MOVSS	ifsTable+(52+6*4)(FP), X14
+	UNPCKLPS	X14, X15
+	MOVLHPS		X15, X2	// X2 := [a2, b2, c2, d2]
+
+	MOVSS	ifsTable+(52+15*4)(FP), X3
+	MOVSS	ifsTable+(52+14*4)(FP), X15
+	UNPCKLPS	X15, X3
+	MOVSS	ifsTable+(52+13*4)(FP), X15
+	MOVSS	ifsTable+(52+12*4)(FP), X14
+	UNPCKLPS	X14, X15
+	MOVLHPS		X15, X3	// X3 := [a3, b3, c3, d3]
+
+	MOVSS	ifsTable+(52+21*4)(FP), X4
+	MOVSS	ifsTable+(52+20*4)(FP), X15
+	UNPCKLPS	X15, X4
+	MOVSS	ifsTable+(52+19*4)(FP), X15
+	MOVSS	ifsTable+(52+18*4)(FP), X14
+	UNPCKLPS	X14, X15
+	MOVLHPS		X15, X4	// X4 := [a4, b4, c4, d4]
+
+	MOVSS	ifsTable+(52+11*4)(FP), X5
+	MOVSS	ifsTable+(52+10*4)(FP), X15
+	UNPCKLPS	X15, X5
+	MOVSS	ifsTable+(52+5*4)(FP), X15
+	MOVSS	ifsTable+(52+4*4)(FP), X14
+	UNPCKLPS	X14, X15
+	MOVLHPS		X15, X5	// X5 := [e1, f1, e2, f2]
+
+	MOVSS	ifsTable+(52+23*4)(FP), X6
+	MOVSS	ifsTable+(52+22*4)(FP), X15
+	UNPCKLPS	X15, X6
+	MOVSS	ifsTable+(52+17*4)(FP), X15
+	MOVSS	ifsTable+(52+16*4)(FP), X14
+	UNPCKLPS	X14, X15
+	MOVLHPS		X15, X6	// X6 := [e3, f3, e4, f4]
+
 	RET
 /*
 
 	
 	MOVL	width+24(FP), R8
 	MOVL	height+28(FP), R9
-	MOVQ	ifsTable+52(FP), R10
+	MOVQ	ifsTable[0]+52(FP), R10
 	MOVL	loopCount+32(FP), R12
-
-// Prepare propability values
-	// sum up the propability values
-	addss xmm1, xmm0
-	addss xmm2, xmm1
-	addss xmm3, xmm2
-	// pack the values into a single register
-	unpcklps xmm0, xmm1
-	unpcklps xmm2, xmm3
-	movlhps xmm0, xmm2	// xmm0 := [p4, p3, p2, p1]
-
-// Prepare function value registers
-	movss xmm1, [r10+4*3]
-	movss xmm15, [r10+4*2]
-	unpcklps xmm1, xmm15
-	movss xmm15, [r10+4]
-	movss xmm14, [r10]
-	unpcklps xmm15, xmm14
-	movlhps xmm1, xmm15	// xmm1 := [a1, b1, c1, d1]
-
-	movss xmm2, [r10+4*9]
-	movss xmm15, [r10+4*8]
-	unpcklps xmm2, xmm15
-	movss xmm15, [r10+4*7]
-	movss xmm14, [r10+4*6]
-	unpcklps xmm15, xmm14
-	movlhps xmm2, xmm15	// xmm2 := [a2, b2, c2, d2]
-
-	movss xmm3, [r10+4*15]
-	movss xmm15, [r10+4*14]
-	unpcklps xmm3, xmm15
-	movss xmm15, [r10+4*13]
-	movss xmm14, [r10+4*12]
-	unpcklps xmm15, xmm14
-	movlhps xmm3, xmm15	// xmm3 := [a3, b3, c3, d3]
-
-	movss xmm4, [r10+4*21]
-	movss xmm15, [r10+4*20]
-	unpcklps xmm4, xmm15
-	movss xmm15, [r10+4*19]
-	movss xmm14, [r10+4*18]
-	unpcklps xmm15, xmm14
-	movlhps xmm4, xmm15	// xmm4 := [a4, b4, c4, d4]
-
-	movss xmm5, [r10+4*11]
-	movss xmm15, [r10+4*10]
-	unpcklps xmm5, xmm15
-	movss xmm15, [r10+4*5]
-	movss xmm14, [r10+4*4]
-	unpcklps xmm15, xmm14
-	movlhps xmm5, xmm15	// xmm5 := [e1, f1, e2, f2]
-
-	movss xmm6, [r10+4*23]
-	movss xmm15, [r10+4*22]
-	unpcklps xmm6, xmm15
-	movss xmm15, [r10+4*17]
-	movss xmm14, [r10+4*16]
-	unpcklps xmm15, xmm14
-	movlhps xmm6, xmm15	// xmm6 := [e3, f3, e4, f4]
 
 	// Create a semi-random seed using rdtsc
 	rdtsc
