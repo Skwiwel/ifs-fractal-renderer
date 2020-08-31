@@ -99,10 +99,10 @@ bitmapClearPixel:
 	JLT		bitmapClearColumn
 	
 // Prepare propability values
-	MOVSS	p1+36(FP), X0
-	MOVSS	p2+40(FP), X1
-	MOVSS 	p3+44(FP), X2
-	MOVSS	p4+48(FP), X3
+	MOVSS	p1+40(FP), X0
+	MOVSS	p2+44(FP), X1
+	MOVSS 	p3+48(FP), X2
+	MOVSS	p4+52(FP), X3
 	// sum up the propability values
 	ADDSS	X0, X1
 	ADDSS	X1, X2
@@ -161,13 +161,44 @@ bitmapClearPixel:
 	UNPCKLPS	X14, X15
 	MOVLHPS		X15, X6	// X6 := [e3, f3, e4, f4]
 
+	// Create a semi-random seed using rdtsc
+	RDTSCP		// RTDSC seems not to be present in Go's assembler, but RTDSCP is.
+	MOVQ AX, R13
+
+// Prepare the rest of the registers
+	MOVSS	scale+36(FP), X12
+	MOVL	width+24(FP), R8
+	MOVL	height+28(FP), R9
+	MOVL	loopCount+32(FP), R12
+	XORPS X8, X8	// X, Y, nextX, nextY := 0
+
+// Draw the fractal
+	// X0 := [p4, p3, p2, p1]
+	// X1 := [a1, b1, c1, d1]
+	// X2 := [a2, b2, c2, d2]
+	// X3 := [a3, b3, c3, d3]
+	// X4 := [a4, b4, c4, d4]
+	// X5 := [e1, f1, e2, f2]
+	// X6 := [e3, f3, e4, f4]
+	// X8 := [X, Y, nextX, nextY]
+	// X9 := random number [0.001-1.000]
+	// X12 := fractal_scale
+	// R8 := int width
+	// R9 := int height
+	// R10 := int X to draw
+	// R11 := int Y to draw
+	// R12 := loopCount
+	// R13 := RNG seed
+	// DI := pixelArray slice
+
+
+
 	RET
 /*
 
 	
 	MOVL	width+24(FP), R8
 	MOVL	height+28(FP), R9
-	MOVQ	ifsTable[0]+52(FP), R10
 	MOVL	loopCount+32(FP), R12
 
 	// Create a semi-random seed using rdtsc
