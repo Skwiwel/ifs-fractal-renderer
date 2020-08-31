@@ -109,8 +109,8 @@ bitmapClearPixel:
 	ADDSS	X2, X3
 	// pack the values into a single register
 	UNPCKLPS	X1, X0
-	UNPCKLPS	X2, X3
-	MOVLHPS		X1, X0	// X0 := [p4, p3, p2, p1]
+	UNPCKLPS	X3, X2
+	MOVLHPS		X2, X0	// X0 := [p4, p3, p2, p1]
 
 // Prepare function value registers
 	MOVSS	ifsTable+(52+3*4)(FP), X1
