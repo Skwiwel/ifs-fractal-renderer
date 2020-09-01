@@ -75,6 +75,7 @@ func (f *fractal) paintRed() {
 	}
 }
 
+// Setup inserts the fractal into the window
 func Setup(window fyne.Window) {
 	fractal := newFractal(defaultWidth, defaultHeight, window)
 	fractal.paintRed()
