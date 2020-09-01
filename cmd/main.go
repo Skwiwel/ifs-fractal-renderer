@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fyne.io/fyne"
 	"fyne.io/fyne/app"
 
 	"github.com/skwiwel/ifs-fractal-maker/internal/fractal"
@@ -11,6 +12,7 @@ func main() {
 
 	window := app.NewWindow("Fractal Maker")
 	window.SetPadded(false)
+	window.Resize(fyne.NewSize(200, 400))
 
 	fractal.Setup(window)
 	//gui.Run(window, fractal.getController())
