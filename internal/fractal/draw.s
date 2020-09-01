@@ -74,10 +74,10 @@ TEXT ·drawPixelArray(SB), $0
 
 // clear the bitmap - set RGBA to (0,0,0,255)
 	MOVQ	pixelArray+0(FP), DI
-	MOVL	$24, AX
+	MOVL	$24, AX	// 24 is byte size of a go slice
 	MULL	width+24(FP)		
 	MOVQ	AX, R8	// width offset end in bytes
-	MOVL	$4, AX	// 24 is byte size of a go slice
+	MOVL	$4, AX
 	MULL	height+28(FP)	
 	MOVQ	AX, R9	// height offset end in bytes
 	MOVQ	$0, R10	// column offset
@@ -170,7 +170,8 @@ bitmapClearPixel:
 	MOVL	width+24(FP), R8
 	MOVL	height+28(FP), R9
 	MOVL	loopCount+32(FP), R12
-	XORPS X8, X8	// X, Y, nextX, nextY := 0
+	XORPS 	X8, X8	// X, Y, nextX, nextY := 0
+	// shufps xmm8, xmm8, 0b	<-- not needed?
 
 // Draw the fractal
 	// X0 := [p4, p3, p2, p1]
@@ -191,87 +192,59 @@ bitmapClearPixel:
 	// R13 := RNG seed
 	// DI := pixelArray slice
 
+fractal_draw_loop:
+	// Get x and y int
+	SHUFPS	$0x93, X8, X8	// rotate left
+	MOVSS	X8, X15
+	MULSS	X12, X15
+	CVTSS2SL X15, R10
+	SHUFPS	$0x93, X8, X8	// rotate left
+	MOVSS	X8, X15
+	MULSS	X12, X15
+	CVTSS2SL X15, R11
+	SHUFPS	$0b01001110, X8, X8	// restore from rotations
+	
+	// TODO: proper positioning of vector
+	//v hardcoded for now
+	ADDL	$100, R10
+	ADDL	$10, R11
+	
+	// invert y
+	SUBL	R9, R11
+	NEGL	R11
+	// Check whether X is contained within image dimensions
+	CMPL	R10, R8
+	JGE		skip_dye
+	CMPL	R10, $0
+	JLT		skip_dye
+	// Check whether Y is contained within image dimensions
+	CMPL	R11, R9
+	JGE		skip_dye
+	CMPL	R11, $0
+	JLT		skip_dye
 
+	// dye pixel
+	MOVQ	$0, AX // maybe not needed
+	MOVL	$24, AX
+	MULL	R10
+	ADDQ	DI, AX		// pointer to column which is a pointer to pixel in the first row
+	MOVQ	(AX), R15	// pointer to first pixel
+	MOVQ	$0, AX // maybe not needed
+	MOVL	$4, AX
+	MULL	R11
+	ADDQ	R15, AX		// pointer to target pixel
+	MOVQ	(AX), R15	// pixel RGBA
+	RORQ	$8, R15		// dyeing green
+	ADDB	$1, R15
+	JNC		not_max_val
+	MOVB	$0xff, R15
+not_max_val:
+	ROLQ	$8, R15
+	MOVQ	R15, (AX)
+skip_dye:
 
 	RET
 /*
-
-	
-	MOVL	width+24(FP), R8
-	MOVL	height+28(FP), R9
-	MOVL	loopCount+32(FP), R12
-
-	// Create a semi-random seed using rdtsc
-	rdtsc
-	MOVQ r13d, eax
-
-// Draw the fractal
-	// xmm0 := [p4, p3, p2, p1]
-	// xmm1 := [a1, b1, c1, d1]
-	// xmm2 := [a2, b2, c2, d2]
-	// xmm3 := [a3, b3, c3, d3]
-	// xmm4 := [a4, b4, c4, d4]
-	// xmm5 := [e1, f1, e2, f2]
-	// xmm6 := [e3, f3, e4, f4]
-	// xmm8 := [X, Y, nextX, nextY]
-	// xmm9 := random number [0.001-1.000]
-	// xmm12 := fractal_scale
-	// r8d := int width
-	// r9d := int height
-	// r10d := int X to draw
-	// r11d := int Y to draw
-	// r12d := loopCount
-	// r13w := RNG seed
-	// rdi  := pBitmap
-	xorps xmm8, xmm8
-	shufps xmm8, xmm8, 0b	// X, Y, nextX, nextY := 0
-
-	movss xmm12, [rel fractal_scale]
-
-fractal_draw_loop:
-	// Get x and y int
-	shufps xmm8, xmm8, 93h	// rotate left
-	movss xmm15, xmm8
-	mulss xmm15, xmm12
-	cvtss2si r10d, xmm15
-	shufps xmm8, xmm8, 93h	// rotate left
-	movss xmm15, xmm8
-	mulss xmm15, xmm12
-	cvtss2si r11d, xmm15
-	shufps xmm8, xmm8, 01001110b	// restore from rotations
-	add r10d, 250	// move fractal to the middle horizontally
-	add r11d, 10	// move fractal up a bit
-	// invert y
-	sub r11d, r9d
-	neg r11d
-	// Check whether X is contained within image dimensions
-	cmp r10d, r8d
-	jge skip_dye
-	cmp r10d, 0
-	jl skip_dye
-	// Check whether Y is contained within image dimensions
-	cmp r11d, r9d
-	jge skip_dye
-	cmp r11d, 0
-	jl skip_dye
-	// dyePixel rdi, r8d, r10d, r11d
-	// dye pixel: rdi:bitmap, r8d:width, r10d:x, r11d:y
-	MOVQ rax, 0
-	MOVQ eax, r11d
-	mul r8d
-	add eax, r10d
-	shl eax, 2
-	add rax, rdi
-	MOVQ r15d, [rax]
-	ror r15d, 8
-	add r15b, 0x01
-	jnc notMaxVal
-	MOVQ r15b, 0xff
-notMaxVal:
-	rol r15d, 8
-	MOVQ [rax], r15d
-	//
-skip_dye:
 	// RNG using seed
 	// For the curious: Uncomment the rdtsc// command and comment the rest of the section (up to xor edx, edx//)
 	// This will show the effects of a very predictable rng that uses pure rdtsc in quick succesion
