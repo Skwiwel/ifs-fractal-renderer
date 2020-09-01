@@ -10,8 +10,8 @@ func (f *fractal) draw() {
 	drawPixelArray(
 		f.pixelArray,
 		f.width, f.height,
-		f.drawIterations,
-		70.0,
+		100000,
+		30.0,
 		ifsconstants.BarnsleyFernProbabilities[0],
 		ifsconstants.BarnsleyFernProbabilities[1],
 		ifsconstants.BarnsleyFernProbabilities[2],
