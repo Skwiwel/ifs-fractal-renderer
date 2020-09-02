@@ -30,10 +30,10 @@ bitmapClearPixel:
 	JLT		bitmapClearColumn
 	
 // Prepare propability values
-	MOVSS	p1+40(FP), X0
-	MOVSS	p2+44(FP), X1
-	MOVSS 	p3+48(FP), X2
-	MOVSS	p4+52(FP), X3
+	MOVSS	ifsTable+(40+6*4)(FP), X0
+	MOVSS	ifsTable+(40+13*4)(FP), X1
+	MOVSS 	ifsTable+(40+20*4)(FP), X2
+	MOVSS	ifsTable+(40+27*4)(FP), X3
 	// sum up the propability values
 	ADDSS	X0, X1
 	ADDSS	X1, X2
@@ -44,51 +44,51 @@ bitmapClearPixel:
 	MOVLHPS		X2, X0	// X0 := [p4, p3, p2, p1]
 
 // Prepare function value registers
-	MOVSS		ifsTable+(52+4*4)(FP), X1
-	MOVSS		ifsTable+(52+3*4)(FP), X15
+	MOVSS		ifsTable+(40+3*4)(FP), X1
+	MOVSS		ifsTable+(40+2*4)(FP), X15
 	UNPCKLPS	X15, X1 
-	MOVSS		ifsTable+(52+2*4)(FP), X15
-	MOVSS		ifsTable+(52+1*4)(FP), X14
+	MOVSS		ifsTable+(40+1*4)(FP), X15
+	MOVSS		ifsTable+(40+0*4)(FP), X14
 	UNPCKLPS	X14, X15 
 	MOVLHPS		X15, X1	// X1 := [a1, b1, c1, d1]
 
-	MOVSS		ifsTable+(52+10*4)(FP), X2
-	MOVSS		ifsTable+(52+9*4)(FP), X15
+	MOVSS		ifsTable+(40+10*4)(FP), X2
+	MOVSS		ifsTable+(40+9*4)(FP), X15
 	UNPCKLPS	X15, X2
-	MOVSS		ifsTable+(52+8*4)(FP), X15
-	MOVSS		ifsTable+(52+7*4)(FP), X14
+	MOVSS		ifsTable+(40+8*4)(FP), X15
+	MOVSS		ifsTable+(40+7*4)(FP), X14
 	UNPCKLPS	X14, X15
 	MOVLHPS		X15, X2	// X2 := [a2, b2, c2, d2]
 
-	MOVSS		ifsTable+(52+16*4)(FP), X3
-	MOVSS		ifsTable+(52+15*4)(FP), X15
+	MOVSS		ifsTable+(40+17*4)(FP), X3
+	MOVSS		ifsTable+(40+16*4)(FP), X15
 	UNPCKLPS	X15, X3
-	MOVSS		ifsTable+(52+14*4)(FP), X15
-	MOVSS		ifsTable+(52+13*4)(FP), X14
+	MOVSS		ifsTable+(40+15*4)(FP), X15
+	MOVSS		ifsTable+(40+14*4)(FP), X14
 	UNPCKLPS	X14, X15
 	MOVLHPS		X15, X3	// X3 := [a3, b3, c3, d3]
 
-	MOVSS		ifsTable+(52+22*4)(FP), X4
-	MOVSS		ifsTable+(52+21*4)(FP), X15
+	MOVSS		ifsTable+(40+24*4)(FP), X4
+	MOVSS		ifsTable+(40+23*4)(FP), X15
 	UNPCKLPS	X15, X4
-	MOVSS		ifsTable+(52+20*4)(FP), X15
-	MOVSS		ifsTable+(52+19*4)(FP), X14
+	MOVSS		ifsTable+(40+22*4)(FP), X15
+	MOVSS		ifsTable+(40+21*4)(FP), X14
 	UNPCKLPS	X14, X15
 	MOVLHPS		X15, X4	// X4 := [a4, b4, c4, d4]
 
-	MOVSS		ifsTable+(52+12*4)(FP), X5
-	MOVSS		ifsTable+(52+11*4)(FP), X15
+	MOVSS		ifsTable+(40+12*4)(FP), X5
+	MOVSS		ifsTable+(40+11*4)(FP), X15
 	UNPCKLPS	X15, X5
-	MOVSS		ifsTable+(52+6*4)(FP), X15
-	MOVSS		ifsTable+(52+5*4)(FP), X14
+	MOVSS		ifsTable+(40+5*4)(FP), X15
+	MOVSS		ifsTable+(40+4*4)(FP), X14
 	UNPCKLPS	X14, X15
 	MOVLHPS		X15, X5	// X5 := [e1, f1, e2, f2]
 
-	MOVSS		ifsTable+(52+24*4)(FP), X6
-	MOVSS		ifsTable+(52+23*4)(FP), X15
+	MOVSS		ifsTable+(40+26*4)(FP), X6
+	MOVSS		ifsTable+(40+25*4)(FP), X15
 	UNPCKLPS	X15, X6
-	MOVSS		ifsTable+(52+18*4)(FP), X15
-	MOVSS		ifsTable+(52+17*4)(FP), X14
+	MOVSS		ifsTable+(40+19*4)(FP), X15
+	MOVSS		ifsTable+(40+18*4)(FP), X14
 	UNPCKLPS	X14, X15
 	MOVLHPS		X15, X6	// X6 := [e3, f3, e4, f4]
 

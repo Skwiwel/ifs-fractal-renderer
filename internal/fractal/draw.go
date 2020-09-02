@@ -12,12 +12,8 @@ func (f *fractal) draw() {
 		f.width, f.height,
 		100000,
 		30.0,
-		ifsconstants.BarnsleyFernProbabilities[0],
-		ifsconstants.BarnsleyFernProbabilities[1],
-		ifsconstants.BarnsleyFernProbabilities[2],
-		ifsconstants.BarnsleyFernProbabilities[3],
 		ifsconstants.BarnsleyFernTable,
 	)
 }
 
-func drawPixelArray(pixelArray [][]color.RGBA, width, height, loopCount uint32, scale, p1, p2, p3, p4 float32, ifsTable [4][6]float32)
+func drawPixelArray(pixelArray [][]color.RGBA, width, height, loopCount uint32, scale float32, ifsTable [4][7]float32)
