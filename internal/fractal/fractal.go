@@ -2,17 +2,22 @@ package fractal
 
 import (
 	"image/color"
+	"sync"
+	"time"
 
 	"fyne.io/fyne"
+	"github.com/skwiwel/ifs-fractal-maker/internal/ifsconstants"
 
 	"fyne.io/fyne/canvas"
 )
 
-const defaultWidth uint32 = 200
-const defaultHeight uint32 = 400
+const (
+	defaultWidth  uint32 = 200
+	defaultHeight uint32 = 400
 
-const minWidth uint32 = 100
-const minHeight uint32 = 100
+	minWidth  uint32 = 100
+	minHeight uint32 = 100
+)
 
 type fractal struct {
 	width, height uint32
@@ -22,34 +27,26 @@ type fractal struct {
 
 	window fyne.Window
 	canvas fyne.CanvasObject
+
+	drawing    bool
+	drawingMux sync.Mutex
 }
 
-func (f *fractal) getPixelAt(x, y, w, h int) color.Color {
-	if insideDimensions(x, y, f) {
-		return f.pixelArray[x][y]
-	}
-	return color.RGBA{}
-}
+// Setup inserts the fractal into the window
+func Setup(window fyne.Window) {
+	fractal := newFractal(defaultWidth, defaultHeight, window)
+	fractal.paintRed()
+	fractal.canvas = canvas.NewRasterWithPixels(fractal.getPixelAt)
 
-func (f *fractal) fractalKey(ev *fyne.KeyEvent) {
-	f.draw()
-	f.refresh()
-}
-
-func (f *fractal) refresh() {
-	f.window.Canvas().Refresh(f.canvas)
-}
-
-func insideDimensions(x, y int, f *fractal) bool {
-	return x < int(f.width) && y < int(f.height)
-}
-
-func (f *fractal) Layout(objects []fyne.CanvasObject, size fyne.Size) {
-	f.canvas.Resize(size)
-}
-
-func (f *fractal) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	return fyne.NewSize(int(minWidth), int(minHeight))
+	window.SetContent(fyne.NewContainerWithLayout(fractal, fractal.canvas))
+	go func() {
+		time.Sleep(1 * time.Second)
+		fractal.Draw(
+			100000000,
+			30.0,
+			ifsconstants.BarnsleyFernTable,
+		)
+	}()
 }
 
 func newFractal(width, height uint32, window fyne.Window) *fractal {
@@ -75,12 +72,33 @@ func (f *fractal) paintRed() {
 	}
 }
 
-// Setup inserts the fractal into the window
-func Setup(window fyne.Window) {
-	fractal := newFractal(defaultWidth, defaultHeight, window)
-	fractal.paintRed()
-	fractal.canvas = canvas.NewRasterWithPixels(fractal.getPixelAt)
+func (f *fractal) getPixelAt(x, y, w, h int) color.Color {
+	if insideDimensions(x, y, f) {
+		return f.pixelArray[x][y]
+	}
+	return color.RGBA{}
+}
 
-	window.SetContent(fyne.NewContainerWithLayout(fractal, fractal.canvas))
-	window.Canvas().SetOnTypedKey(fractal.fractalKey)
+func insideDimensions(x, y int, f *fractal) bool {
+	return x < int(f.width) && y < int(f.height)
+}
+
+func (f *fractal) fractalKey(ev *fyne.KeyEvent) {
+	f.Draw(
+		10000000,
+		30.0,
+		ifsconstants.BarnsleyFernTable,
+	)
+}
+
+func (f *fractal) refresh() {
+	f.window.Canvas().Refresh(f.canvas)
+}
+
+func (f *fractal) Layout(objects []fyne.CanvasObject, size fyne.Size) {
+	f.canvas.Resize(size)
+}
+
+func (f *fractal) MinSize(objects []fyne.CanvasObject) fyne.Size {
+	return fyne.NewSize(int(minWidth), int(minHeight))
 }
