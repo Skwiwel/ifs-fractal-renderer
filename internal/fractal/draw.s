@@ -163,7 +163,7 @@ fractal_draw_loop:
 	ADDQ	R15, AX		// pointer to target pixel
 	MOVQ	(AX), R15	// pixel RGBA
 	RORQ	$8, R15		// dyeing green
-	ADDB	$8, R15
+	ADDB	$1, R15
 	JNC		not_max_val
 	MOVB	$0xff, R15
 not_max_val:
