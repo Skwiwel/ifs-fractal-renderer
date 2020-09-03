@@ -1,7 +1,6 @@
 package fractal
 
 import (
-	"image/color"
 	"time"
 )
 
@@ -21,7 +20,7 @@ func (f *fractal) Draw(loopCount uint32, scale float32, ifsTable [4][7]float32) 
 
 	go func() {
 		drawPixelArray(
-			f.pixelArray,
+			f.image.Pix,
 			f.width, f.height,
 			loopCount,
 			scale,
@@ -45,4 +44,4 @@ func (f *fractal) Draw(loopCount uint32, scale float32, ifsTable [4][7]float32) 
 
 }
 
-func drawPixelArray(pixelArray [][]color.RGBA, width, height, loopCount uint32, scale float32, ifsTable [4][7]float32)
+func drawPixelArray(pixelArray []uint8, width, height, loopCount uint32, scale float32, ifsTable [4][7]float32)

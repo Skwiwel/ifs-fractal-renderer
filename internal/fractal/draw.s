@@ -1,34 +1,22 @@
 DATA	fractal_scale+0(SB)/8, $70.0
 
-// func drawPixelArray(pixelArray [][]color.RGBA, width, height, loopCount uint32, p1, p2, p3, p4 float32, ifsTable [4][6]float32
+// func drawPixelArray(pixelArray []uint8, width, height, loopCount uint32, scale float32, ifsTable [4][7]float32)
 TEXT ·drawPixelArray(SB), $0-152
 
 // clear the bitmap - set RGBA to (0,0,0,255)
 	MOVQ	pixelArray+0(FP), DI
-	MOVL	$24, AX	// 24 is byte size of a go slice
-	MULL	width+24(FP)		
-	MOVQ	AX, R8	// width offset end in bytes
-	MOVL	$4, AX
-	MULL	height+28(FP)	
-	MOVQ	AX, R9	// height offset end in bytes
-	MOVQ	$0, R10	// column offset
-bitmapClearColumn:
-	MOVQ	$0, R11	// row	offset
-	MOVQ	DI, CX
-	ADDQ	R10, CX		// pointer to column which is a pointer to first pixel in row
-	MOVQ	0(CX), CX	// current column
+	MOVQ	$4, AX
+	MULL	width+24(FP)
+	MULL	height+28(FP)
+	ADDQ	DI, AX
+	MOVQ	AX, R8	// first memory address after the last pixel
+	MOVQ	DI, R9	// current pixel address
 bitmapClearPixel:
-	MOVQ	CX, AX
-	ADDQ	R11, AX	// pixel
-	MOVQ	$0xff000000, 0(AX)
-	ADDQ	$4, R11	// 4 is bytes per pixel
-	CMPQ	R11, R9	// compare row to array height
-	JLT 	bitmapClearPixel
-	NOP
-	ADDQ	$24, R10
-	CMPQ	R10, R8
-	JLT		bitmapClearColumn
-	
+	MOVQ	$0xff000000, 0(R9)
+	ADDQ	$4, R9
+	CMPQ	R9, R8
+	JLT		bitmapClearPixel
+
 // Prepare propability values
 	MOVSS	ifsTable+(40+6*4)(FP), X0
 	MOVSS	ifsTable+(40+13*4)(FP), X1
@@ -154,13 +142,14 @@ fractal_draw_loop:
 	JLT		skip_dye
 
 	// dye pixel
-	MOVL	$24, AX
-	MULL	R10
-	ADDQ	DI, AX		// pointer to column which is a pointer to pixel in the first row
-	MOVQ	(AX), R15	// pointer to first pixel
-	MOVL	$4, AX
-	MULL	R11
-	ADDQ	R15, AX		// pointer to target pixel
+	MOVQ	$4, AX
+	MULQ	R10
+	MOVQ	AX, R15
+	MOVQ	$4, AX
+	MULQ	R8
+	MULQ	R11
+	ADDQ	R15, AX
+	ADDQ	DI, AX		// pointer to target pixel
 	MOVQ	(AX), R15	// pixel RGBA
 	RORQ	$8, R15		// dyeing green
 	ADDB	$1, R15
