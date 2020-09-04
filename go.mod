@@ -9,4 +9,5 @@ require (
 	github.com/inkyblackness/imgui-go v1.12.0
 	github.com/inkyblackness/imgui-go-examples v1.4.0 // indirect
 	github.com/inkyblackness/imgui-go/v2 v2.4.1
+	github.com/vijayviji/executor v0.0.5
 )

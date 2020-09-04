@@ -1,32 +1,37 @@
 package fractal
 
 import (
+	"image"
 	"image/color"
 	"sync"
 	"time"
 
 	"fyne.io/fyne"
-	"github.com/skwiwel/ifs-fractal-maker/internal/ifsconstants"
-
 	"fyne.io/fyne/canvas"
+
+	"github.com/skwiwel/ifs-fractal-maker/internal/ifsconstants"
 )
 
 const (
-	defaultWidth  uint32 = 200
-	defaultHeight uint32 = 400
+	// DefaultWidth is the default width of the fractal part of the window
+	DefaultWidth uint32 = 500
+	// DefaultHeight is the default height of the fractal part of the window
+	DefaultHeight uint32 = 1000
 
-	minWidth  uint32 = 100
-	minHeight uint32 = 100
+	// MinWidth is the the minimum width the window is allowed to be
+	MinWidth uint32 = 100
+	// MinHeight is the the minimum height the window is allowed to be
+	MinHeight uint32 = 100
 )
 
 type fractal struct {
 	width, height uint32
-	pixelArray    [][]color.RGBA
+	image         *image.RGBA
 
 	drawIterations uint32
 
 	window fyne.Window
-	canvas fyne.CanvasObject
+	output *canvas.Raster
 
 	drawing    bool
 	drawingMux sync.Mutex
@@ -34,47 +39,43 @@ type fractal struct {
 
 // Setup inserts the fractal into the window
 func Setup(window fyne.Window) {
-	fractal := newFractal(defaultWidth, defaultHeight, window)
-	fractal.paintRed()
-	fractal.canvas = canvas.NewRasterWithPixels(fractal.getPixelAt)
+	fractal := newFractal(DefaultWidth, DefaultHeight, window)
+	fractal.output = canvas.NewRasterFromImage(fractal.image)
 
-	window.SetContent(fyne.NewContainerWithLayout(fractal, fractal.canvas))
+	fractal.paintRed()
+
+	window.SetContent(fyne.NewContainerWithLayout(fractal, fractal.output))
 	go func() {
-		time.Sleep(1 * time.Second)
+		time.Sleep(2 * time.Second)
 		fractal.Draw(
 			100000000,
-			30.0,
+			100.0,
 			ifsconstants.BarnsleyFernTable,
 		)
 	}()
 }
 
 func newFractal(width, height uint32, window fyne.Window) *fractal {
-	pixelArray := make([][]color.RGBA, width)
-	for column := range pixelArray {
-		pixelArray[column] = make([]color.RGBA, height)
-	}
-
 	return &fractal{
-		width:      defaultWidth,
-		height:     defaultHeight,
-		pixelArray: pixelArray,
-		window:     window,
+		width:  DefaultWidth,
+		height: DefaultHeight,
+		image:  image.NewRGBA(image.Rect(0, 0, int(width), int(height))),
+		window: window,
 	}
 }
 
 // for testing purposes
 func (f *fractal) paintRed() {
-	for column := range f.pixelArray {
-		for row := range f.pixelArray[column] {
-			f.pixelArray[column][row] = color.RGBA{255, 0, 0, 255}
+	for x := 0; x < int(f.width); x++ {
+		for y := 0; y < int(f.height); y++ {
+			f.image.SetRGBA(x, y, color.RGBA{255, 0, 0, 255})
 		}
 	}
 }
 
 func (f *fractal) getPixelAt(x, y, w, h int) color.Color {
 	if insideDimensions(x, y, f) {
-		return f.pixelArray[x][y]
+		return f.image.At(x, y)
 	}
 	return color.RGBA{}
 }
@@ -92,13 +93,13 @@ func (f *fractal) fractalKey(ev *fyne.KeyEvent) {
 }
 
 func (f *fractal) refresh() {
-	f.window.Canvas().Refresh(f.canvas)
+	f.output.Refresh()
 }
 
 func (f *fractal) Layout(objects []fyne.CanvasObject, size fyne.Size) {
-	f.canvas.Resize(size)
+	f.output.Resize(size)
 }
 
 func (f *fractal) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	return fyne.NewSize(int(minWidth), int(minHeight))
+	return fyne.NewSize(int(MinWidth), int(MinHeight))
 }

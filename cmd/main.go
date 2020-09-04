@@ -12,7 +12,7 @@ func main() {
 
 	window := app.NewWindow("Fractal Maker")
 	window.SetPadded(false)
-	window.Resize(fyne.NewSize(200, 400))
+	window.Resize(fyne.NewSize(int(fractal.DefaultWidth), int(fractal.DefaultHeight)))
 
 	fractal.Setup(window)
 	//gui.Run(window, fractal.getController())
