@@ -7,28 +7,31 @@ import (
 	"time"
 
 	"fyne.io/fyne"
-	"github.com/skwiwel/ifs-fractal-maker/internal/ifsconstants"
-
 	"fyne.io/fyne/canvas"
+
+	"github.com/skwiwel/ifs-fractal-maker/internal/ifsconstants"
 )
 
 const (
-	defaultWidth  uint32 = 200
-	defaultHeight uint32 = 400
+	// DefaultWidth is the default width of the fractal part of the window
+	DefaultWidth uint32 = 500
+	// DefaultHeight is the default height of the fractal part of the window
+	DefaultHeight uint32 = 1000
 
-	minWidth  uint32 = 100
-	minHeight uint32 = 100
+	// MinWidth is the the minimum width the window is allowed to be
+	MinWidth uint32 = 100
+	// MinHeight is the the minimum height the window is allowed to be
+	MinHeight uint32 = 100
 )
 
 type fractal struct {
 	width, height uint32
 	image         *image.RGBA
-	//pixelArray    [][]color.RGBA
 
 	drawIterations uint32
 
 	window fyne.Window
-	output *canvas.Image
+	output *canvas.Raster
 
 	drawing    bool
 	drawingMux sync.Mutex
@@ -36,9 +39,8 @@ type fractal struct {
 
 // Setup inserts the fractal into the window
 func Setup(window fyne.Window) {
-	fractal := newFractal(defaultWidth, defaultHeight, window)
-	fractal.output = canvas.NewImageFromImage(fractal.image)
-	fractal.output.ScaleMode = canvas.ImageScalePixels
+	fractal := newFractal(DefaultWidth, DefaultHeight, window)
+	fractal.output = canvas.NewRasterFromImage(fractal.image)
 
 	fractal.paintRed()
 
@@ -47,7 +49,7 @@ func Setup(window fyne.Window) {
 		time.Sleep(2 * time.Second)
 		fractal.Draw(
 			100000000,
-			30.0,
+			100.0,
 			ifsconstants.BarnsleyFernTable,
 		)
 	}()
@@ -55,8 +57,8 @@ func Setup(window fyne.Window) {
 
 func newFractal(width, height uint32, window fyne.Window) *fractal {
 	return &fractal{
-		width:  defaultWidth,
-		height: defaultHeight,
+		width:  DefaultWidth,
+		height: DefaultHeight,
 		image:  image.NewRGBA(image.Rect(0, 0, int(width), int(height))),
 		window: window,
 	}
@@ -99,5 +101,5 @@ func (f *fractal) Layout(objects []fyne.CanvasObject, size fyne.Size) {
 }
 
 func (f *fractal) MinSize(objects []fyne.CanvasObject) fyne.Size {
-	return fyne.NewSize(int(minWidth), int(minHeight))
+	return fyne.NewSize(int(MinWidth), int(MinHeight))
 }
