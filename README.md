@@ -1,4 +1,4 @@
-# IFS Fractal Maker
+# IFS Fractal Renderer
 ## Work in progress
 A program for creating [iterated function system (IFS)](https://en.wikipedia.org/wiki/Iterated_function_system) fractals. The fractals are drawn in real time in the executable's window and the parameters are set with a visual user interface.
 
