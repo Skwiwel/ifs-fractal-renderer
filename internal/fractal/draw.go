@@ -10,7 +10,10 @@ const fps = 30
 
 var drawingExecutor = executor.NewSingleThreadExecutor("drawingExecutor", 1)
 
-func (f *fractal) Draw(loopCount uint32, scale float32, ifsTable [4][7]float32) {
+// Draw draws the ifs on the canvas.
+// When called it triggers the drawing process. While the ifs is being drawn the canvas will
+// keep refreshing until it's finished. Function calls while the ifs is still being drawn are dropped.
+func (f *Fractal) Draw(loopCount uint32, scale float32, ifsTable [4][7]float32) {
 	f.drawingMux.Lock()
 	if f.drawing {
 		f.drawingMux.Unlock()
@@ -30,8 +33,10 @@ func (f *fractal) Draw(loopCount uint32, scale float32, ifsTable [4][7]float32) 
 			ifsTable,
 		})
 
-	f.refreshUntilFinished(drawingEnd)
+	//f.paintRed()
+	//close(drawingEnd)
 
+	f.refreshUntilFinished(drawingEnd)
 }
 
 func drawUsingExecutor(endChan chan struct{}, data ifsDrawData) {
@@ -67,9 +72,8 @@ func waitForTaskFinish(future *executor.Future) {
 	future.Get()
 }
 
-func (f *fractal) refreshUntilFinished(drawingEnd chan struct{}) {
+func (f *Fractal) refreshUntilFinished(drawingEnd chan struct{}) {
 	fpsTicker := time.NewTicker(time.Second / fps)
-
 	for {
 		select {
 		case <-drawingEnd:
