@@ -13,7 +13,7 @@ var drawingExecutor = executor.NewSingleThreadExecutor("drawingExecutor", 1)
 // Draw draws the ifs on the canvas.
 // When called it triggers the drawing process. While the ifs is being drawn the canvas will
 // keep refreshing until it's finished. Function calls while the ifs is still being drawn are dropped.
-func (f *Fractal) Draw(loopCount uint32, scale float32, ifsTable [4][7]float32) {
+func (f *Fractal) Draw(data *DrawData) {
 	f.drawingMux.Lock()
 	if f.drawing {
 		f.drawingMux.Unlock()
@@ -28,13 +28,8 @@ func (f *Fractal) Draw(loopCount uint32, scale float32, ifsTable [4][7]float32) 
 		ifsDrawData{
 			f.image.Pix,
 			f.width, f.height,
-			loopCount,
-			scale,
-			ifsTable,
+			data,
 		})
-
-	//f.paintRed()
-	//close(drawingEnd)
 
 	f.refreshUntilFinished(drawingEnd)
 }
@@ -52,9 +47,7 @@ func drawUsingExecutor(endChan chan struct{}, data ifsDrawData) {
 type ifsDrawData struct {
 	pixelArray    []uint8
 	width, height uint32
-	loopCount     uint32
-	scale         float32
-	ifsTable      [4][7]float32
+	drawData      *DrawData
 }
 
 func drawPixelArrayEncapsulated(data ifsDrawData) {
@@ -62,9 +55,9 @@ func drawPixelArrayEncapsulated(data ifsDrawData) {
 		data.pixelArray,
 		data.width,
 		data.height,
-		data.loopCount,
-		data.scale,
-		data.ifsTable,
+		data.drawData.LoopCount,
+		data.drawData.Scale,
+		data.drawData.IfsTable,
 	)
 }
 
